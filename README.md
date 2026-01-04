@@ -32,8 +32,8 @@ A demo application showcasing **resumable streaming** with tRPC v11, TanStack Qu
 When `sendMessage` is called:
 1. A `ReadableStream` is created (simulating an LLM API)
 2. The stream is `tee()`'d into two branches
-3. One branch feeds `consumeStream()` - a fire-and-forget background task that updates the message in memory
-4. The other branch yields chunks directly to the client
+3. One branch feeds `consumeStream()` - a fire-and-forget background task that updates the message in memory (simulating DB persistence)
+4. The other branch yields chunks directly to the client 
 
 If the client disconnects, the background task continues. When `resumeMessage` is called:
 1. Client sends its current content
