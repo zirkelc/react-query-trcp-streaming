@@ -1,5 +1,5 @@
-type MessageRole = 'user' | 'assistant';
-type MessageStatus = 'streaming' | 'done' | 'error';
+type MessageRole = "user" | "assistant";
+type MessageStatus = "streaming" | "done" | "error";
 
 type MessageBubbleProps = {
   content: string;

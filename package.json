@@ -3,16 +3,23 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev:trpc": "pnpm --filter trpc-streaming \"/^dev:.*/\""
+    "format": "oxfmt",
+    "lint": "oxlint --fix"
   },
   "dependencies": {
+    "@ai-sdk/provider": "^3.0.4",
+    "@ai-sdk/react": "^3.0.35",
     "@tanstack/react-query": "^5.62.0",
     "@trpc/client": "^11.0.0",
     "@trpc/server": "^11.0.0",
     "@trpc/tanstack-react-query": "^11.0.0",
+    "ai": "^6.0.33",
     "cors": "^2.8.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "redis": "^5.10.0",
+    "redis-memory-server": "^0.14.1",
+    "resumable-stream": "^2.2.10",
     "zod": "^3.24.0"
   },
   "devDependencies": {
@@ -21,6 +28,8 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "oxfmt": "^0.24.0",
+    "oxlint": "^1.39.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.0"
