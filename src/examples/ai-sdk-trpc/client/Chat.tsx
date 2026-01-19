@@ -87,7 +87,7 @@ export function Chat() {
           <small>Chat ID: {chatId}</small>
           <br />
           <small>Status: {status}</small>
-          {error && <div style={{ color: `red`, marginTop: `8px` }}>Error: {error.message}</div>}
+          {/* {error && <div style={{ color: `red`, marginTop: `8px` }}>Error: {error.message}</div>} */}
         </div>
         <button
           type="button"
