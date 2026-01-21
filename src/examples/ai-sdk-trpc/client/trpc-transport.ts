@@ -1,31 +1,11 @@
-import type { ChatTransport, UIMessage, ChatRequestOptions } from "ai";
-import type { UIMessageChunk } from "ai";
+import type { ChatTransport, UIMessageChunk } from "ai";
+import { convertAsyncIterableToStream } from "ai-stream-utils/utils";
+import { MyUIMessage } from "../server/router";
 import { trpcClient } from "./trpc";
 
-function convertAsyncIterableToStream<T>(iterable: AsyncIterable<T>): ReadableStream<T> {
-  return new ReadableStream<T>({
-    async start(controller) {
-      try {
-        for await (const chunk of iterable) {
-          controller.enqueue(chunk);
-        }
-        controller.close();
-      } catch (error) {
-        controller.error(error);
-      }
-    },
-  });
-}
-
-export class TrpcChatTransport implements ChatTransport<UIMessage> {
+export class TrpcChatTransport implements ChatTransport<MyUIMessage> {
   async sendMessages(
-    options: {
-      trigger: `submit-message` | `regenerate-message`;
-      chatId: string;
-      messageId: string | undefined;
-      messages: Array<UIMessage>;
-      abortSignal: AbortSignal | undefined;
-    } & ChatRequestOptions,
+    options: Parameters<ChatTransport<MyUIMessage>["sendMessages"]>[0],
   ): Promise<ReadableStream<UIMessageChunk>> {
     console.log(`[TrpcChatTransport] sendMessages chatId=${options.chatId}`);
 
@@ -48,9 +28,7 @@ export class TrpcChatTransport implements ChatTransport<UIMessage> {
   }
 
   async reconnectToStream(
-    options: {
-      chatId: string;
-    } & ChatRequestOptions,
+    options: Parameters<ChatTransport<MyUIMessage>["reconnectToStream"]>[0],
   ): Promise<ReadableStream<UIMessageChunk> | null> {
     console.log(`[TrpcChatTransport] reconnectToStream chatId=${options.chatId}`);
 

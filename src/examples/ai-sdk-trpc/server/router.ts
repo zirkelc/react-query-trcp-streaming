@@ -6,16 +6,28 @@ import {
   JsonToSseTransformStream,
   parseJsonEventStream,
   uiMessageChunkSchema,
+  UIMessageChunk,
+  InferUIMessageChunk,
+  InferUITools,
 } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
 import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
 import { generateId } from "../../../shared/utils";
 import { publicProcedure, router } from "./trpc";
 import { getStreamContext } from "./stream-context";
+import { createAsyncIterableStream } from 'ai-stream-utils/utils';
+
+type MyMetadata = {  };
+
+type MyDataPart = {  };
+
+type MyTools = InferUITools<{}>;
+
+export type MyUIMessage = UIMessage<MyMetadata, MyDataPart, MyTools>;
 
 type Chat = {
   chatId: string;
-  messages: Array<UIMessage>;
+  messages: Array<MyUIMessage>;
   activeStreamId: string | null;
 };
 
@@ -35,63 +47,6 @@ function saveChat(chat: Chat) {
 }
 
 const MOCK_RESPONSE = `This is a very long message that will take a while to stream so we can test the interrupt and resume functionality properly and see if everything works as expected`;
-
-/**
- * Creates an async iterable stream from a ReadableStream.
- * Copied from https://github.com/vercel/ai/blob/main/packages/ai/src/util/async-iterable-stream.ts
- */
-function createAsyncIterableStream<T>(
-  source: ReadableStream<T>,
-): AsyncIterable<T> & ReadableStream<T> {
-  const stream = source.pipeThrough(new TransformStream<T, T>());
-
-  (stream as AsyncIterable<T> & ReadableStream<T>)[Symbol.asyncIterator] = function (
-    this: ReadableStream<T>,
-  ): AsyncIterator<T> {
-    const reader = this.getReader();
-    let finished = false;
-
-    async function cleanup(cancelStream: boolean) {
-      if (finished) return;
-      finished = true;
-      try {
-        if (cancelStream) {
-          await reader.cancel?.();
-        }
-      } finally {
-        try {
-          reader.releaseLock();
-        } catch {}
-      }
-    }
-
-    return {
-      async next(): Promise<IteratorResult<T>> {
-        if (finished) {
-          return { done: true, value: undefined };
-        }
-        const { done, value } = await reader.read();
-        if (done) {
-          await cleanup(true);
-          return { done: true, value: undefined };
-        }
-        return { done: false, value };
-      },
-
-      async return(): Promise<IteratorResult<T>> {
-        await cleanup(true);
-        return { done: true, value: undefined };
-      },
-
-      async throw(err: unknown): Promise<IteratorResult<T>> {
-        await cleanup(true);
-        throw err;
-      },
-    };
-  };
-
-  return stream as AsyncIterable<T> & ReadableStream<T>;
-}
 
 function textToChunks(text: string): Array<LanguageModelV3StreamPart> {
   const words = text.split(` `);
@@ -134,10 +89,10 @@ export const appRouter = router({
     .input(
       z.object({
         chatId: z.string(),
-        message: z.custom<UIMessage>(),
+        message: z.custom<MyUIMessage>(),
       }),
     )
-    .mutation(async function* ({ input }): AsyncGenerator<unknown> {
+    .mutation(async function* ({ input }): AsyncGenerator<InferUIMessageChunk<MyUIMessage>> {
       const { chatId, message } = input;
       console.log(`[sendMessage] chatId=${chatId}, message=${message.id}`);
       const chat = getChat(chatId);
@@ -198,7 +153,7 @@ export const appRouter = router({
 
   resumeMessage: publicProcedure.input(z.object({ chatId: z.string() })).mutation(async function* ({
     input,
-  }): AsyncGenerator<unknown> {
+  }): AsyncGenerator<InferUIMessageChunk<MyUIMessage>> {
     const { chatId } = input;
     console.log(`[resumeMessage] chatId=${chatId}`);
 

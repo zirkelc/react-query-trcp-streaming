@@ -5,6 +5,7 @@ import { Message } from "./Message";
 import { TrpcChatTransport } from "./trpc-transport";
 import { trpcClient } from "./trpc";
 import { generateId, getUrlParam, setUrlParam } from "../../../shared/utils";
+import type { MyUIMessage } from "../server/router";
 
 const transport = new TrpcChatTransport();
 
@@ -13,7 +14,7 @@ export function Chat() {
   const [input, setInput] = useState(``);
   const [isLoading, setLoading] = useState(true);
 
-  const { messages, setMessages, sendMessage, status, error, resumeStream } = useChat<UIMessage>({
+  const { messages, setMessages, sendMessage, status, error, resumeStream } = useChat<MyUIMessage>({
       id: chatId,
       transport,
       generateId: () => generateId(`msg`),

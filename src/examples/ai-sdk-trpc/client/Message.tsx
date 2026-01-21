@@ -1,7 +1,7 @@
-import type { UIMessage } from "ai";
+import type { MyUIMessage } from "../server/router";
 
 type MessageProps = {
-  message: UIMessage;
+  message: MyUIMessage;
 };
 
 export function Message({ message }: MessageProps) {
